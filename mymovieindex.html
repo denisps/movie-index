@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Movies</title>
+        <style>
+            #pages a {
+                padding: 0 3px;
+            }
+            
+            #pages .sel {
+                background: lightblue;
+            }
+            
+			#movies {
+				margin-top: 5px;
+			}
+			
+            .movie {
+                -display: none;
+                float: left;
+                width: 300px;
+                height: 168px;
+                margin: 2px;
+                padding: 2px; 
+                color: #FFF;
+                text-shadow: 1px 1px 2px #000;
+                -font-weight: bold;
+				text-decoration: none;
+				font-size: 17pt;
+                background: #000 no-repeat center; 
+                background-image: url(thumbnail.png);
+            }
+            .movie b {
+                -background-color: rgba(255,255,255,.7);
+                -border-radius: 4px;
+                padding: 3px;
+            }
+            .movie:active, .movie:focus {
+                color: yellow;
+            }
+			.movie img {
+				position: absolute;
+			}
+			#search {
+				display: none;
+			}
+			#search.show {
+				display: inline-block;
+			}
+        </style>
+    </head>
+    <body>
+        <a href="javascript:window.location.reload(true)" id="reload">Reload</a>
+		<a href="javascript:void(a=document.getElementById('search'),a.classList.add('show'),a.focus())">Search</a>
+		<input onkeyup="search=this.value;page=0;filter()" onblur="this.classList.remove('show')" id="search" />
+        <a href="javascript:document.body.requestFullscreen()">Full</a>
+        <a href="javascript:void(page=0,sort=0,filter())">By Date</a>
+        <a href="javascript:void(page=0,sort=1,filter())">By Name</a>
+        <span id="pages"></span>
+        <span id="key"></span>
+        <br>
+        <div id="movies" onkeyup="onKeyUp(event);" tabindex="0">
+        </div>
+        <script>
+    function c(e){
+        var schema = "#Intent;action=android.intent.action.VIEW;scheme=http;type=video/mp4;end";
+        window.location.href = e.target.href.replace(/^http:/,"intent:").replace(/(%20| )/g,"+") + schema;
+        e.preventDefault();
+    }
+    
+    function fromURI(uri) {
+        return uri.replace(/[_]/g, ' ').replace(/\$([^\$]+)\$/g, function(x, p1){
+            return String.fromCharCode(parseInt(p1, 16))
+        });
+    }
+
+	function movie2html(movie) {
+        var uri = movie.name;
+		var m = movie.name.match(/([^\\\/]+)$/);
+		return ('<a class="movie" onclick="c(event)" '
+			+ 'style="background-image: url(' + uri + '.thumbnail.jpg)" '
+            + 'href="' + uri + '"'
+            + '>'
+			+ fromURI(m[1]).replace(/[._-]/g, ' ')
+			+ '</a>');
+	}
+	
+    var quant = 30, page = 0, pages = 0, search = '', sel = 0, sort = 0, movies, found;
+    
+	function show() {
+		var start = page * quant, end = start + quant;
+		document.getElementById('movies').innerHTML = found.slice(start, end).map(movie2html).join('\r\n');
+		for(var pg of document.getElementById('pages').children) {
+			if (pg.textContent - 1 == page) {
+				pg.classList.add('sel');
+			} else {
+				pg.classList.remove('sel');
+			}
+		}
+	}
+	
+    function filter() {
+        var reg = new RegExp(search.replace(/ /g, ".+"), "i");
+		var filter_fn = search.match(/(^| )porn( |$)/i)
+			? ( movie => movie.name.match(reg) )
+			: ( movie => movie.name.match(reg) && !movie.name.match(/\/porn\//i) );
+		found = movies.filter(filter_fn).sort(sort ? byName : byTime);
+		
+		pages = found.length / quant;
+		
+        var lnk = [], pg = document.getElementById('pages');
+        for (var i = 0; i < pages; i++) {
+            lnk.push('<a href="#"' + (i == page ? ' class="sel"' : '') + ' onclick="page = ' + i + ';show();">' + (i + 1) + '</a>');
+        }
+        pg.innerHTML = lnk.join(' ');
+		show();
+    }
+    
+    function byTime(a, b){
+        return b.time - a.time;
+    }
+    
+    function byName(a, b){
+        return a.name.toUpperCase().localeCompare(b.name.toUpperCase());
+    }
+    
+    function toURI(path) {
+        return path.replace(/[^a-z0-9\/. -]/ig, function(x){
+            return '$' + x.charCodeAt(0).toString(16) + '$'
+        }).replace(/[ ]/g, '_')
+    }
+    
+    function makeLinks(s, sortfn) {
+        movies = s;
+		filter();
+    }
+
+    function onKeyUp(e) {
+        if (e.key == 1){
+            search.focus();
+        } else if(e.key == 2){
+			document.getElementById('search').value = '';
+            window.location.reload(true);
+        } else if(e.key == 3){
+            document.body.requestFullscreen();
+        } else if(e.key == 4){
+            if (page > 0) page = (page - 1) % pages;
+            show();
+            //movies[sel].focus();
+			document.getElementById('movies').firstChild.focus();
+        } else if(e.key == 6){
+            if (page < pages) page = (page + 1) % pages;
+            show();
+            //movies[sel].focus();
+			document.getElementById('movies').firstChild.focus();
+        } else {
+            document.getElementById('key').textContent = (e.key == 'ArrowLeft');
+        }
+    }
+</script>
+<script src="/mymoviescript.js"></script>
+</body>
+</html>
