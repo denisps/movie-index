@@ -34,7 +34,7 @@ var media = {};
 function thumnail() {
     var file = thumbque.process();
     if (file) {
-        var cmd = 'u:/ffmpeg -ss 00:00:50 -i "' + file + '" -y -vf '
+        var cmd = 'ffmpeg -ss 00:00:50 -i "' + file + '" -y -vf '
 				+ 'scale=w=300:h=168:force_original_aspect_ratio=decrease "' + file + '.thumbnail.jpg" ';
         console.log(cmd);
         child_process.exec(cmd, { windowsHide: true }, function(error){

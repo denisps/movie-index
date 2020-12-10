@@ -1,0 +1,2 @@
+This project is designed to resign in the root of a drive where Download and drives are located. The ffmpeg can be located using PATH variable or you can just place the binary in the same root folder.
+The page can be accessed at http://127.0.0.1:8000/mymovieindex.html

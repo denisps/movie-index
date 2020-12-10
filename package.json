@@ -1,8 +1,8 @@
 {
-  "name": "serve4a",
+  "name": "movie-index",
   "version": "1.0.0",
   "description": "",
-  "main": "serve4a.js",
+  "main": "serve.js",
   "dependencies": {
     "send": "^0.14.2"
   },
@@ -11,5 +11,5 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC"
+  "license": "GPL"
 }
